@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main, integration ]
+  pull_request:
+    branches: [ master, main, integration ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Version consistency check
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/Check-VersionConsistency.ps1
+
+      - name: Restore NuGet packages
+        run: msbuild FileConverter.sln /t:Restore /p:Configuration=Release /p:Platform=x64
+
+      - name: Audit vulnerable packages (High and Critical fail)
+        shell: powershell
+        run: |
+          $projects = @(
+            'Application/FileConverter/FileConverter.csproj',
+            'Application/FileConverter.Core/FileConverter.Core.csproj',
+            'Application/FileConverterExtension/FileConverterExtension.csproj'
+          )
+          $failed = $false
+          foreach ($proj in $projects) {
+            if (-not (Test-Path $proj)) { continue }
+            Write-Host "Auditing $proj"
+            $audit = & dotnet list $proj package --vulnerable --include-transitive 2>&1 | Out-String
+            Write-Host $audit
+            if ($audit -match '(?i)\b(Critical|High)\b' -and $audit -match '(?i)vulnerable') {
+              Write-Error "Vulnerable High/Critical packages reported for $proj"
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Build solution (Release x64, unsigned installer)
+        run: msbuild FileConverter.sln /p:Configuration=Release /p:Platform=x64 /p:EnableInstallerSign=false /m
+
+      - name: Run unit tests
+        run: dotnet test tests/FileConverter.Tests/FileConverter.Tests.csproj -c Release --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults

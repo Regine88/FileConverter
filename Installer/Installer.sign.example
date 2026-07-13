@@ -1,0 +1,24 @@
+<!--
+  Copy this file to Installer.sign and fill in your certificate details for signed Release builds.
+  Do NOT commit real certificate passwords or private key paths to the repository.
+
+  Enable with:
+    msbuild Installer.wixproj -p:Configuration=Release -p:Platform=x64 -p:EnableInstallerSign=true
+-->
+<Project>
+  <PropertyGroup>
+    <!-- Path to your .pfx or use a certificate store thumbprint via SignTool. -->
+    <SignToolPath>signtool.exe</SignToolPath>
+    <SigningCertificatePath>path\to\your-certificate.pfx</SigningCertificatePath>
+    <SigningCertificatePassword></SigningCertificatePassword>
+    <TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
+  </PropertyGroup>
+
+  <!-- Example post-build sign target; adjust to your signing workflow. -->
+  <Target Name="SignInstaller" AfterTargets="Build" Condition="'$(EnableInstallerSign)' == 'true'">
+    <Message Importance="high" Text="Signing $(TargetPath) ..." />
+    <!--
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /f &quot;$(SigningCertificatePath)&quot; /p &quot;$(SigningCertificatePassword)&quot; /tr $(TimestampServerUrl) /td sha256 /fd sha256 &quot;$(TargetPath)&quot;" />
+    -->
+  </Target>
+</Project>
