@@ -1,100 +1,151 @@
 # File Converter
 
-## Description
+[![Release](https://img.shields.io/github/v/release/Regine88/FileConverter?include_prereleases)](https://github.com/Regine88/FileConverter/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE.md)
 
-**File Converter** is a very simple tool which allows you to convert and compress one or several file(s) using the context menu of windows explorer.
+基于 [Tichau/FileConverter](https://github.com/Tichau/FileConverter) 的改进版（当前 **v2.2.2**）。
+
+**File Converter** 是一款简洁的 Windows 工具：在资源管理器右键菜单中即可转换、压缩一个或多个文件。
 
 ![File Converter Usage](Resources/FileConverterUsage.gif)
 
-You can download it here: [file-converter.io](https://file-converter.io/?from=readme.md).
+## 下载安装
 
-You can find more information about what's in File converter and how to use it on the [wiki](https://github.com/Tichau/FileConverter/wiki).
+| 项目 | 链接 |
+|---|---|
+| 最新安装包 (x64 MSI) | [FileConverter-2.2.2-x64-setup.msi](https://github.com/Regine88/FileConverter/releases/download/v2.2.2/FileConverter-2.2.2-x64-setup.msi) |
+| 全部 Release | https://github.com/Regine88/FileConverter/releases |
+| 原项目主页 | https://file-converter.io/ |
+| 原项目 Wiki | https://github.com/Tichau/FileConverter/wiki |
 
-## Donate
+**系统要求**
 
-File Converter is a personal open source project started in 2014. I have put hundreds of hours adding, refining and tuning File Converter with the goal of making the conversion and compression of files an easy task for everyone.
+- Windows 10/11 **x64**
+- .NET Framework 4.8
+- Word / Excel / PowerPoint 文档转换需要已安装对应的 Microsoft Office（COM 自动化）
 
-You can help me by [contributing to the project](https://github.com/Tichau/FileConverter/wiki#contribute), by [making a donation](https://www.paypal.com/donate/?cmd=_donations&business=3BDWQTYTTA3D8&item_name=File+Converter+Donations&currency_code=EUR&Z3JncnB0=) or just by [saying thanks](https://saythanks.io/to/Tichau) :).
+> 当前仅支持 **x64**。不再提供 x86 安装通道，详见 [docs/PLATFORM_SUPPORT.md](docs/PLATFORM_SUPPORT.md)。
 
-## Troubleshooting
+### 校验安装包（可选）
 
-If you encounter any problem with File Converter, you can:
+```powershell
+Get-FileHash .\FileConverter-2.2.2-x64-setup.msi -Algorithm SHA256
+# 期望: 49C7ACA4FF70DECC3E491336ED2E655632B069CA82EA5A83D2C9C8C647672B5B
+```
 
-* See the already known problems in the [troubleshooting section of the documentation](https://github.com/Tichau/FileConverter/wiki/Troubleshooting).
-* Or report an issue on the [bug tracker](https://github.com/Tichau/FileConverter/issues).
+`version.xml` 中的下载地址与 SHA-256 已与本仓库 Release 同步。
 
-## Setup development environment
+## 本仓库主要改进（相对上游）
 
-### Requirements
+- **Office 转换稳定性**：转换任务在 **STA** 线程执行，修复 Word 转 PDF 时进程闪退
+- **安装包完整性**：MSI 包含 `FileConverter.Core` 与 **NetOffice** 程序集（`WordApi` / `ExcelApi` / `PowerPointApi` 等），避免运行时报找不到程序集
+- **FFmpeg**：并发读取 stdout/stderr、检查退出码、超时与进程树终止
+- **ImageMagick**：升级 Magick.NET，进程级资源限制；PDF 页数探测使用 Ping
+- **升级安全**：安装包 SHA-256 + WinVerifyTrust / 发布者校验
+- **配置与临时文件**：原子保存配置、损坏文件保留、临时清单随机化与清理
+- **工程化**：`FileConverter.Core` 可测逻辑库、MSTest、CI、版本一致性脚本
 
-For File Converter and its explorer extension:
+## 使用方式
 
-* Visual Studio 2022
+1. 安装 MSI 后，在资源管理器中选中文件
+2. 右键 → **File Converter** → 选择预设（例如 **To Pdf**）
+3. 等待主窗口中的任务完成
 
-For the installer:
+更多用法与预设说明可参考[原项目 Wiki](https://github.com/Tichau/FileConverter/wiki)。
 
-* [Wix 5](http://wixtoolset.org/) (will be installed by nuget)
-  * [Community Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=FireGiant.FireGiantHeatWaveDev17)
-* [Windows SDK Signing Tools for Desktop Apps](https://developer.microsoft.com/fr-fr/windows/downloads/windows-10-sdk)
+## 从源码构建
 
-## Thanks
+### 环境
 
-Thanks to all the contributors of File Converter project.
+| 组件 | 说明 |
+|---|---|
+| Visual Studio 2022 或 Build Tools | 含 .NET Framework 4.8 目标包 |
+| WiX 5 | 通过 NuGet 还原（安装器项目） |
+| Windows x64 | 目标平台 |
 
-### Localization
+### 编译 Release 与安装包
 
-* Thanks to **Khidreal** and **hugok79** for the Portuguese localization.
-* Thanks to **Marhc** for the Brazilian localization.
-* Thanks to **Chachak** for the Spanish localization.
-* Thanks to **Davide** for the Italian localization.
-* Thanks to **nikotschierske** for the German localization.
-* Thanks to **Snoopy1866** for the Simplified Chinese localization.
-* Thanks to **MayaC0re** for the Turkish localization.
-* Thanks to **vishveshjain** for the Hindi localization.
-* Thanks to **Mahmoud0Sultan** for the Arabic localization.
-* Thanks to **Sedimentary-Rock**, **NeKoOuO** and **PeterDaveHello** for the Traditional Chinese localization.
-* Thanks to **CrisBalGreece** for the Greek localization.
-* Thanks to **AshiVered** for the Hebrew localization.
-* Thanks to **MrHero118** and **Mehrdad32** for the Persian localization.
-* Thanks to **crnobog69** for the Serbian localizations.
-* Thanks to **oogamiyuta** for the Japanese localization.
-* Thanks to **AidyTheWeird** for the Czech localization.
-* Thanks to **Alanimdeo** for the Korean localization.
-* Thanks to **vrykolakas166** and **thaovd** for the Vietnamese localization.
-* Thanks to **iliamak** for the Russian localization.
-* Thanks to **itsmefdil** for the Indonesian localization.
-* Thanks to **hamzaharoon1314** for the Urdu localization.
-* Thanks to **Zyvrec7** and **stohlferenc** for the Hungarian localization.
-* Thanks to **Maerek** and **MrPrince419** for the Polish localization.
-* Thanks to **rkalitta** for the Swedish localization.
+```powershell
+cd FileConverter-integration   # 或克隆后的仓库根目录
 
-## Middlewares
+# 完整解决方案（unsigned Release MSI）
+msbuild FileConverter.sln `
+  /p:Configuration=Release `
+  /p:Platform=x64 `
+  /p:EnableInstallerSign=false `
+  /m
+```
 
-File converter uses the following middlewares:
+生成物示例：
 
-**ffmpeg** (v8.0.1) as file conversion software.
-Thanks to ffmpeg devs for this awesome open source file conversion tool. [Web site link](https://ffmpeg.org)
+- 主程序：`Application\FileConverter\bin\x64\Release\FileConverter.exe`
+- 安装包：`Installer\bin\x64\Release\FileConverter-setup.msi`
 
-**ImageMagick** (v14.10) as image edition and conversion software.
-Thanks to image magick devs for this awesome open source image edition software suite.  [Web site link](http://imagemagick.net)
-And thanks to dlemstra for the C# wrapper of this software. [Github link](https://github.com/ImageMagick/ImageMagick)
+### 测试与版本检查
 
-**Ghostscript** (10.02.1) as pdf edition software.
-Thanks to ghostscript devs. [Download link](https://www.ghostscript.com/download/gsdnld.html)
+```powershell
+dotnet test tests\FileConverter.Tests\FileConverter.Tests.csproj -c Release
+powershell -File scripts\Check-VersionConsistency.ps1
+```
 
-**SharpShell** to easily create windows context menu extensions.
-Thanks to Dave Kerr for his work on SharpShell. [GitHub link](https://github.com/dwmkerr/sharpshell)
+发布前若需校验 `version.xml` 中的 SHA-256 / Publisher 非空：
 
-**Ripper** and **yeti.mmedia** for CD Audio extraction.
-Thanks to Idael Cardoso for his work on CD Audio ripper. [Code project link](https://www.codeproject.com/Articles/5458/C-Sharp-Ripper)
+```powershell
+powershell -File scripts\Check-VersionConsistency.ps1 -RequireManifestSecrets
+```
 
-**Markdown.XAML** for markdown rendering in the wpf application.
-Thanks to Bevan Arps for his work on Markdown.XAML. [GitHub link](https://github.com/theunrepentantgeek/Markdown.XAML)
+### 代码签名（可选）
 
-**WpfAnimatedGif** for animated gif rendering in the wpf application.
-Thanks to Thomas Levesque for his work on WpfAnimatedGif. [GitHub link](https://github.com/XamlAnimatedGif/WpfAnimatedGif)
+Release 签名仅在同时满足时启用：
 
-## License
+- `EnableInstallerSign=true`
+- 存在本地 `Installer\Installer.sign`（参见 `Installer\Installer.sign.example`）
 
-File Converter is licensed under the GPL version 3 License.
-For more information check the LICENSE.md file in your installation folder or the [gnu website](https://www.gnu.org/licenses/gpl.html).
+## 仓库结构（简要）
+
+```text
+Application/FileConverter          # WPF 主程序
+Application/FileConverter.Core     # 可复用纯逻辑（哈希、校验、扩展名等）
+Application/FileConverterExtension # 资源管理器右键扩展
+Installer/                         # WiX 安装工程
+Middleware/                        # 随包 FFmpeg / Ghostscript 等
+tests/FileConverter.Tests          # 单元测试
+docs/                              # 平台支持、中间件 SBOM
+scripts/                           # 版本一致性与 SBOM 脚本
+version.xml                        # 更新检查用清单（URL + SHA256）
+```
+
+## 问题反馈
+
+- 本仓库 Issue：https://github.com/Regine88/FileConverter/issues  
+- 原项目 Issue / Wiki：https://github.com/Tichau/FileConverter  
+
+诊断日志目录：`%LOCALAPPDATA%\FileConverter\Diagnostics-*`
+
+## 致谢
+
+感谢原作者 [Tichau](https://github.com/Tichau) 及所有贡献者、本地化译者。
+
+本项目继承上游中间件与第三方组件，主要包括：
+
+| 组件 | 用途 |
+|---|---|
+| [FFmpeg](https://ffmpeg.org) | 音视频转换 |
+| [ImageMagick](https://imagemagick.org) / [Magick.NET](https://github.com/dlemstra/Magick.NET) | 图像 / PDF 相关转换 |
+| [Ghostscript](https://www.ghostscript.com) | PDF 处理 |
+| [SharpShell](https://github.com/dwmkerr/sharpshell) | Shell 右键扩展 |
+| Ripper / yeti.mmedia | CD 音频提取 |
+| Markdown.XAML、WpfAnimatedGif | UI 展示 |
+
+完整本地化致谢列表见上游 README / 发行说明。中间件哈希清单见 [docs/MIDDLEWARE_SBOM.md](docs/MIDDLEWARE_SBOM.md)。
+
+## 捐赠（原作者）
+
+File Converter 自 2014 年起由原作者长期维护。若你希望支持原作者：
+
+- [PayPal 捐赠](https://www.paypal.com/donate/?cmd=_donations&business=3BDWQTYTTA3D8&item_name=File+Converter+Donations&currency_code=EUR&Z3JncnB0=)
+- [Say Thanks](https://saythanks.io/to/Tichau)
+
+## 许可证
+
+本项目遵循 **GNU GPL v3**。详见 [LICENSE.md](LICENSE.md) 或 [GNU GPL 页面](https://www.gnu.org/licenses/gpl.html)。
